@@ -94,9 +94,9 @@ export const endpoints = {
 
 // Auth API functions
 export const authApi = {
-  login: (data: { email: string; password: string }) =>
+  login: (data: { phoneNumber: string; password: string }) =>
     api.post(endpoints.auth.login, data),
-  register: (data: { name: string; email: string; password: string }) =>
+  register: (data: { name: string; phoneNumber: string; password: string }) =>
     api.post(endpoints.auth.register, data),
   getProfile: () => api.get(endpoints.auth.profile),
   logout: () => api.post(endpoints.auth.logout),

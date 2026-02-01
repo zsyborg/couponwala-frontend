@@ -1,21 +1,20 @@
 // User Types
 export interface User {
   id: string;
-  email: string;
+  phoneNumber: string;
   name: string;
   avatar?: string;
-  phone?: string;
   createdAt: string;
 }
 
 export interface LoginParams {
-  email: string;
+  phoneNumber: string;
   password: string;
 }
 
 export interface RegisterParams {
   name: string;
-  email: string;
+  phoneNumber: string;
   password: string;
   confirmPassword?: string;
 }
