@@ -183,7 +183,7 @@ export function TrendingDeals() {
                 key={filter}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   index === 0
-                    ? "bg-purple-600 text-white shadow-lg"
+                    ? "bg-yellow-500 text-white shadow-lg"
                     : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                 }`}
               >
@@ -216,7 +216,7 @@ export function TrendingDeals() {
                   </span>
                 </div>
                 {/* Discount Badge */}
-                <div className="absolute top-3 right-3 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                <div className="absolute top-3 right-3 bg-orange-500 text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
                   {deal.discount}
                 </div>
                 {/* Favorite Button */}

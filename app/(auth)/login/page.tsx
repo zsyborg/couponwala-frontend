@@ -68,7 +68,7 @@ export default function LoginPage() {
                 <input
                   id="phoneNumber"
                   type="tel"
-                  placeholder="+1234567890"
+                  placeholder="1234567890"
                   className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   {...register("phoneNumber")}
                 />

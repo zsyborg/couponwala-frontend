@@ -14,11 +14,13 @@ import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { CouponShowcase } from "@/components/home/CouponCard";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+import { Header } from "@/components/layout/Header";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <CartSidebar />
+      <Header/>
 
       {/* New Hero Section */}
       <HeroSection />

@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #2563eb;
+  --primary: #FFC000;
   --primary-foreground: #ffffff;
   --secondary: #f4f4f5;
   --secondary-foreground: #18181b;
@@ -14,7 +14,7 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e4e4e7;
-  --ring: #2563eb;
+  --ring: #FFC000;
   --radius: 0.5rem;
 }
 
