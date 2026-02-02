@@ -45,4 +45,4 @@ export interface RatingSubmission {
   images?: string[];
 }
 
-export interface ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'helpful';
+export type ReviewSortOption = 'recent' | 'highest' | 'lowest' | 'helpful';

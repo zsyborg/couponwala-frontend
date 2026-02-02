@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           });
 
-          const { user, accessToken, refreshToken } = response.data;
+          const { user, accessToken, refreshToken } = response;
 
           // Store tokens in session
           return {

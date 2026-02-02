@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card';
 
 // Types
@@ -754,3 +755,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

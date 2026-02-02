@@ -158,12 +158,12 @@ export function ReviewsList({
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Sort by:</span>
           <select
-            value={sortBy}
+            value={sortBy as string}
             onChange={(e) => handleSort(e.target.value as ReviewSortOption)}
             className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           >
             {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value as string} value={option.value as string}>
                 {option.label}
               </option>
             ))}
@@ -251,8 +251,8 @@ function ReviewCard({ review, isHelpful, onHelpful }: ReviewCardProps) {
           {/* Review Text */}
           <p className="text-gray-600 leading-relaxed mb-3">
             {isLongReview && !showFullReview
-              ? `${review.review.slice(0, maxLength)}...`
-              : review.review}
+              ? `${review.review?.slice(0, maxLength) || ''}...`
+              : review.review || ''}
             {isLongReview && (
               <button
                 onClick={() => setShowFullReview(!showFullReview)}

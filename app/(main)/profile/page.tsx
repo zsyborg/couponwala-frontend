@@ -18,6 +18,7 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { payments, redemptions, favorites, referrals, wallet, auth } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
+import { Favorite } from "@/types";
 
 // Types
 interface OrderItem {
@@ -66,21 +67,6 @@ interface Redemption {
   };
   couponCode: string;
   status: string;
-  createdAt: string;
-}
-
-interface Favorite {
-  _id: string;
-  offer: {
-    _id: string;
-    name: string;
-    description?: string;
-    imageUrl?: string;
-    price: number;
-    discountedPrice: number;
-    category: string;
-    store?: string;
-  };
   createdAt: string;
 }
 

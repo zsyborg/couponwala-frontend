@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { OfferFilters } from "@/types";
+import type { OfferFilters } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";

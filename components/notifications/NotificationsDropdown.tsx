@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, RefObject } from "react";
 import Link from "next/link";
 import { Bell, Package, Tag, Wallet, Users, Settings, Clock, ChevronRight, Check, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -40,7 +40,7 @@ export function NotificationsDropdown() {
   const { recentNotifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
     useNotifications();
 
-  useOnClickOutside(dropdownRef, () => setIsOpen(false));
+  useOnClickOutside(dropdownRef as RefObject<HTMLElement>, () => setIsOpen(false));
 
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.isRead) {

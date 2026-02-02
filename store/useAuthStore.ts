@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login(credentials);
-          const { user, accessToken, refreshToken } = response.data;
+          const { user, accessToken, refreshToken } = response;
 
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.register(data);
-          const { user, accessToken, refreshToken } = response.data;
+          const { user, accessToken, refreshToken } = response;
 
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);

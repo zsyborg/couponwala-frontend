@@ -80,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.login(phoneNumber, password);
       setUser(response.user);
-      setToken(response.token);
+      setToken(response.accessToken);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.loginWithOTP(phoneNumber, otp);
       setUser(response.user);
-      setToken(response.token);
+      setToken(response.accessToken);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.register(data.phoneNumber, data.password, data.name, data.referralCode);
       setUser(response.user);
-      setToken(response.token);
+      setToken(response.accessToken);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.registerWithOTP(data.phoneNumber, "", data.name, data.email, data.referralCode);
       setUser(response.user);
-      setToken(response.token);
+      setToken(response.accessToken);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);

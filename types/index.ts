@@ -2,6 +2,7 @@
 export interface User {
   id: string;
   phoneNumber: string;
+  email?: string;
   name: string;
   avatar?: string;
   createdAt: string;
@@ -128,4 +129,20 @@ export interface Notification {
   createdAt: string;
   actionUrl?: string;
   actionText?: string;
+}
+
+// Favorite Type
+export interface Favorite {
+  _id: string;
+  offer: {
+    _id: string;
+    name: string;
+    description?: string;
+    imageUrl?: string;
+    price: number;
+    discountedPrice: number;
+    category: string;
+    store?: string;
+  };
+  createdAt: string;
 }

@@ -1,4 +1,4 @@
-import { User, Offer, PaginatedResponse } from '@/types';
+import { User, Offer, PaginatedResponse, Favorite } from '@/types';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -6,12 +6,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/a
 // Types
 interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
   refreshToken: string;
 }
 
 interface LoginParams {
-  email: string;
+  phoneNumber?: string;
+  email?: string;
   password: string;
 }
 
@@ -91,12 +92,6 @@ interface Notification {
   message: string;
   type: string;
   isRead: boolean;
-  createdAt: string;
-}
-
-interface Favorite {
-  _id: string;
-  offer: Offer;
   createdAt: string;
 }
 
@@ -247,7 +242,7 @@ class ApiClient {
       body: JSON.stringify(params),
     });
     const data = await this.handleResponse<AuthResponse>(response);
-    this.setTokens(data.token, data.refreshToken);
+    this.setTokens(data.accessToken, data.refreshToken);
     return data;
   }
 
@@ -258,7 +253,7 @@ class ApiClient {
       body: JSON.stringify(params),
     });
     const data = await this.handleResponse<AuthResponse>(response);
-    this.setTokens(data.token, data.refreshToken);
+    this.setTokens(data.accessToken, data.refreshToken);
     return data;
   }
 
@@ -289,7 +284,7 @@ class ApiClient {
       body: JSON.stringify(params),
     });
     const data = await this.handleResponse<AuthResponse>(response);
-    this.setTokens(data.token, data.refreshToken);
+    this.setTokens(data.accessToken, data.refreshToken);
     return data;
   }
 
@@ -300,7 +295,7 @@ class ApiClient {
       body: JSON.stringify(params),
     });
     const data = await this.handleResponse<AuthResponse>(response);
-    this.setTokens(data.token, data.refreshToken);
+    this.setTokens(data.accessToken, data.refreshToken);
     return data;
   }
 
