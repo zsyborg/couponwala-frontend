@@ -279,7 +279,7 @@ export function TrendingDeals() {
                 </div>
 
                 {/* Action Button */}
-                <Button className="w-full h-10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-200 group-hover:shadow-lg">
+                <Button className="w-full h-10 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-200 group-hover:shadow-lg">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Get Deal
                   <ExternalLink className="w-3 h-3 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />

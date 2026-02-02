@@ -1,85 +1,150 @@
 "use client";
 
-import Link from "next/link";
-import { ShoppingCart, Tag } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/Card";
+import { Offer } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Offer } from "@/types";
-import { formatCurrency, calculateDiscount } from "@/lib/utils";
-import { useCartStore } from "@/store/useCartStore";
+import { ShoppingCart, Star, Clock } from "lucide-react";
 
 interface OfferCardProps {
   offer: Offer;
+  onAddToCart?: (offer: Offer) => void;
+  isLoading?: boolean;
 }
 
-export function OfferCard({ offer }: OfferCardProps) {
-  const { addItem } = useCartStore();
-  const discount = calculateDiscount(offer.originalPrice, offer.discountedPrice);
+export function OfferCard({ offer, onAddToCart, isLoading }: OfferCardProps) {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(offer);
+  const calculateSavings = () => {
+    return offer.originalPrice - offer.discountedPrice;
   };
 
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
       {/* Image Section */}
-      <div className="relative h-48 bg-muted overflow-hidden">
+      <div className="relative h-48 bg-gray-100 overflow-hidden">
         {offer.imageUrl ? (
           <img
             src={offer.imageUrl}
             alt={offer.serviceName}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <Tag className="h-12 w-12 text-muted-foreground" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-orange-200">
+            <span className="text-4xl font-bold text-orange-500">
+              {offer.store.charAt(0)}
+            </span>
           </div>
         )}
+
         {/* Discount Badge */}
-        <Badge className="absolute top-3 left-3" variant="destructive">
-          {discount}% OFF
-        </Badge>
+        <div className="absolute top-3 left-3">
+          <Badge variant="primary" className="bg-orange-500 text-white">
+            {offer.discountPercentage}% OFF
+          </Badge>
+        </div>
+
         {/* Store Badge */}
-        <Badge className="absolute top-3 right-3" variant="secondary">
-          {offer.store}
-        </Badge>
+        <div className="absolute top-3 right-3">
+          <Badge variant="default" className="bg-white/90 backdrop-blur-sm">
+            {offer.store}
+          </Badge>
+        </div>
+
+        {/* Expiring Soon Badge */}
+        {offer.expiresAt && new Date(offer.expiresAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
+          <div className="absolute bottom-3 left-3">
+            <Badge variant="error" className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Ending Soon
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* Content Section */}
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg line-clamp-1 mb-1">
+      <div className="p-4">
+        {/* Category */}
+        <div className="mb-2">
+          <Badge variant="info" className="text-xs">
+            {offer.category}
+          </Badge>
+        </div>
+
+        {/* Title */}
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
           {offer.serviceName}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+
+        {/* Description */}
+        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
           {offer.description}
         </p>
 
         {/* Price Section */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">
-            {formatCurrency(offer.discountedPrice)}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-2xl font-bold text-orange-600">
+            {formatPrice(offer.discountedPrice)}
           </span>
-          <span className="text-sm text-muted-foreground line-through">
-            {formatCurrency(offer.originalPrice)}
+          <span className="text-lg text-gray-400 line-through">
+            {formatPrice(offer.originalPrice)}
+          </span>
+          <span className="text-sm text-green-600 font-medium">
+            Save {formatPrice(calculateSavings())}
           </span>
         </div>
-      </CardContent>
 
-      {/* Footer Section */}
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Link href={`/offers/${offer.id}`} className="flex-1">
-          <Button variant="outline" className="w-full">
-            View Details
-          </Button>
-        </Link>
-        <Button onClick={handleAddToCart} className="flex-1">
-          <ShoppingCart className="h-4 w-4 mr-2" />
+        {/* Coupon Code */}
+        {offer.couponCode && (
+          <div className="mb-4 p-2 bg-orange-50 rounded-lg border border-orange-100">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-mono text-orange-700">
+                {offer.couponCode}
+              </span>
+              <button
+                className="text-xs text-orange-600 hover:text-orange-800 font-medium"
+                onClick={() => navigator.clipboard.writeText(offer.couponCode)}
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add to Cart Button */}
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full"
+          onClick={() => onAddToCart?.(offer)}
+          isLoading={isLoading}
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
           Add to Cart
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
+  );
+}
+
+// Skeleton loader for OfferCard
+export function OfferCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+      <div className="h-48 bg-gray-200" />
+      <div className="p-4">
+        <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
+        <div className="h-6 w-3/4 bg-gray-200 rounded mb-2" />
+        <div className="h-4 w-full bg-gray-200 rounded mb-3" />
+        <div className="h-8 w-32 bg-gray-200 rounded mb-4" />
+        <div className="h-10 w-full bg-gray-200 rounded" />
+      </div>
+    </div>
   );
 }

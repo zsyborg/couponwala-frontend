@@ -27,15 +27,15 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t bg-muted/50">
+    <footer className="border-t bg-amber-500 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-primary">CouponWala</span>
+              <span className="text-xl font-bold text-white">CouponWala</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white">
               Discover amazing deals and save money on your favorite services.
             </p>
             <div className="flex space-x-4">
@@ -45,7 +45,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-white hover:text-foreground transition-colors"
                 >
                   <social.icon className="h-5 w-5" />
                 </a>
@@ -61,7 +61,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-white hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -78,7 +78,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-white hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -95,7 +95,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-white hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -107,15 +107,15 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-white">
             © {new Date().getFullYear()} CouponWala. All rights reserved.
           </p>
           <div className="flex items-center space-x-4">
-            <img
+            {/* <img
               src="https://via.placeholder.com/40x25"
               alt="Payment methods"
               className="h-6 opacity-50"
-            />
+            /> */}
           </div>
         </div>
       </div>

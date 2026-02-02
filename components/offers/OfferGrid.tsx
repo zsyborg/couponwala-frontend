@@ -1,27 +1,34 @@
 "use client";
 
 import { Offer } from "@/types";
-import { OfferCard } from "./OfferCard";
+import { OfferCard, OfferCardSkeleton } from "./OfferCard";
+import { Button } from "@/components/ui/Button";
+import { Search, Package } from "lucide-react";
 
 interface OfferGridProps {
   offers: Offer[];
-  isLoading?: boolean;
+  isLoading: boolean;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  onAddToCart?: (offer: Offer) => void;
+  searchQuery?: string;
 }
 
-export function OfferGrid({ offers, isLoading }: OfferGridProps) {
+export function OfferGrid({
+  offers,
+  isLoading,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore,
+  onAddToCart,
+  searchQuery = "",
+}: OfferGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="h-48 bg-muted rounded-t-xl" />
-            <div className="p-4 space-y-3 bg-card rounded-b-xl">
-              <div className="h-5 bg-muted rounded w-3/4" />
-              <div className="h-4 bg-muted rounded w-full" />
-              <div className="h-4 bg-muted rounded w-2/3" />
-              <div className="h-6 bg-muted rounded w-1/3" />
-            </div>
-          </div>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <OfferCardSkeleton key={index} />
         ))}
       </div>
     );
@@ -29,35 +36,55 @@ export function OfferGrid({ offers, isLoading }: OfferGridProps) {
 
   if (offers.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-muted-foreground mb-4">
-          <svg
-            className="mx-auto h-12 w-12"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <Search className="w-10 h-10 text-gray-400" />
         </div>
-        <h3 className="text-lg font-medium mb-2">No offers found</h3>
-        <p className="text-muted-foreground">
-          Try adjusting your filters or search terms
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          {searchQuery ? "No offers found" : "No offers available"}
+        </h3>
+        <p className="text-gray-500 max-w-md">
+          {searchQuery
+            ? `We couldn't find any offers matching "${searchQuery}". Try adjusting your search or filters.`
+            : "Check back later for amazing deals and discounts on your favorite services."}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {offers.map((offer) => (
-        <OfferCard key={offer.id} offer={offer} />
-      ))}
+    <div>
+      {/* Results count */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-gray-500">
+          Showing <span className="font-medium text-gray-900">{offers.length}</span> offers
+        </p>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {offers.map((offer) => (
+          <OfferCard
+            key={offer.id}
+            offer={offer}
+            onAddToCart={onAddToCart}
+          />
+        ))}
+      </div>
+
+      {/* Load More */}
+      {hasMore && onLoadMore && (
+        <div className="mt-8 flex justify-center">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={onLoadMore}
+            isLoading={isLoadingMore}
+          >
+            Load More Offers
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

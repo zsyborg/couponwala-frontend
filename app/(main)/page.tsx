@@ -14,6 +14,8 @@ import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { CouponShowcase } from "@/components/home/CouponCard";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+import { DealOfTheDay } from "@/components/home/DealOfTheDay";
+import { RecentlyViewedCarousel } from "@/components/home/RecentlyViewedCarousel";
 
 export default function HomePage() {
   return (
@@ -23,11 +25,17 @@ export default function HomePage() {
       {/* New Hero Section */}
       <HeroSection />
 
+      {/* Deal of the Day */}
+      <DealOfTheDay />
+
       {/* Featured Carousel */}
       <FeaturedCarousel />
 
       {/* Trending Deals */}
       <TrendingDeals />
+
+      {/* Recently Viewed Section */}
+      <RecentlyViewedCarousel />
 
       {/* Category Showcase */}
       <CategoryShowcase />
@@ -54,13 +62,15 @@ export default function HomePage() {
 
           {/* View All Coupons Button */}
           <div className="text-center mt-12">
-            <Button
-              size="lg"
-              className="h-12 px-8 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200"
-            >
-              View All Coupons
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            <Link href="/offers">
+              <Button
+                size="lg"
+                className="h-12 px-8 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200"
+              >
+                View All Coupons
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -140,7 +150,7 @@ export default function HomePage() {
                     "App-Only Deals",
                     "Price Drop Alerts",
                     "Favorite Stores",
-                  ].map((feature, index) => (
+                  ].map((feature) => (
                     <div
                       key={feature}
                       className="flex items-center gap-2 text-white/90"

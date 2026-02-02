@@ -1,179 +1,289 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { useState, useCallback } from "react";
+import { OfferFilters } from "@/types";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { OfferFilters as OfferFiltersType } from "@/types";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Badge } from "@/components/ui/Badge";
+import { Search, Filter, X, ChevronDown } from "lucide-react";
 
 interface OfferFiltersProps {
-  filters: OfferFiltersType;
-  onFiltersChange: (filters: OfferFiltersType) => void;
+  filters: OfferFilters;
+  onFiltersChange: (filters: OfferFilters) => void;
   categories: string[];
-  stores: string[];
+  stores?: string[];
 }
+
+const sortOptions = [
+  { value: "popularity", label: "Popularity / Trending" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "discount_desc", label: "Discount: High to Low" },
+  { value: "newest", label: "Newest First" },
+];
 
 export function OfferFilters({
   filters,
   onFiltersChange,
   categories,
-  stores,
+  stores = [],
 }: OfferFiltersProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [searchValue, setSearchValue] = useState(filters.search || "");
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onFiltersChange({ ...filters, search: searchValue });
-  };
+  // Debounced search
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      const timeout = setTimeout(() => {
+        onFiltersChange({ ...filters, search: value, page: 1 });
+      }, 300);
+      return () => clearTimeout(timeout);
+    },
+    [filters, onFiltersChange]
+  );
 
   const handleCategoryChange = (category: string) => {
-    const newCategory = filters.category === category ? undefined : category;
-    onFiltersChange({ ...filters, category: newCategory });
+    onFiltersChange({
+      ...filters,
+      category: category === "All" ? undefined : category,
+      page: 1,
+    });
   };
 
-  const handleStoreChange = (store: string) => {
-    const newStore = filters.store === store ? undefined : store;
-    onFiltersChange({ ...filters, store: newStore });
-  };
-
-  const handlePriceChange = (
-    type: "minPrice" | "maxPrice",
-    value: string
-  ) => {
+  const handlePriceChange = (type: "min" | "max", value: string) => {
     const numValue = value ? parseFloat(value) : undefined;
-    onFiltersChange({ ...filters, [type]: numValue });
+    onFiltersChange({
+      ...filters,
+      [type === "min" ? "minPrice" : "maxPrice"]: numValue,
+      page: 1,
+    });
+  };
+
+  const handleSortChange = (sortBy: string) => {
+    let newFilters: OfferFilters = { ...filters, sortBy: undefined, sortOrder: undefined, page: 1 };
+
+    switch (sortBy) {
+      case "price_asc":
+        newFilters.sortBy = "discountedPrice";
+        newFilters.sortOrder = "asc";
+        break;
+      case "price_desc":
+        newFilters.sortBy = "discountedPrice";
+        newFilters.sortOrder = "desc";
+        break;
+      case "discount_desc":
+        newFilters.sortBy = "discountPercentage";
+        newFilters.sortOrder = "desc";
+        break;
+      case "newest":
+        newFilters.sortBy = "createdAt";
+        newFilters.sortOrder = "desc";
+        break;
+      default:
+        newFilters.sortBy = "popularity";
+        break;
+    }
+
+    onFiltersChange(newFilters);
   };
 
   const clearFilters = () => {
     setSearchValue("");
-    onFiltersChange({});
+    onFiltersChange({
+      page: 1,
+      limit: filters.limit,
+    });
   };
 
   const hasActiveFilters =
+    filters.search ||
     filters.category ||
-    filters.store ||
     filters.minPrice ||
     filters.maxPrice ||
-    filters.search;
+    filters.sortBy;
 
   return (
-    <div className="space-y-4">
-      {/* Search Bar */}
-      <form onSubmit={handleSearchSubmit} className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search offers..."
-          value={searchValue}
-          onChange={handleSearchChange}
-          className="w-full h-10 pl-10 pr-4 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-        <Button
-          type="submit"
-          variant="ghost"
-          size="sm"
-          className="absolute right-1 top-1/2 -translate-y-1/2"
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-orange-500" />
+          <h2 className="font-semibold text-gray-900">Filters</h2>
+        </div>
+        <button
+          className="lg:hidden p-1 hover:bg-gray-100 rounded"
+          onClick={() => setIsExpanded(!isExpanded)}
         >
-          Search
-        </Button>
-      </form>
+          <ChevronDown
+            className={`w-5 h-5 transition-transform ${
+              isExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </div>
 
-      {/* Mobile Filter Toggle */}
-      <div className="md:hidden flex items-center justify-between">
+      {/* Search */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search offers..."
+            value={searchValue}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-400"
+          />
+        </div>
+      </div>
+
+      {/* Sort Dropdown */}
+      <div className="mb-4">
+        <Select
+          label="Sort By"
+          options={[
+            { value: "", label: "Default" },
+            ...sortOptions.map((opt) => ({ value: opt.value, label: opt.label })),
+          ]}
+          value={
+            filters.sortBy === "discountedPrice" && filters.sortOrder === "asc"
+              ? "price_asc"
+              : filters.sortBy === "discountedPrice" && filters.sortOrder === "desc"
+              ? "price_desc"
+              : filters.sortBy === "discountPercentage" && filters.sortOrder === "desc"
+              ? "discount_desc"
+              : filters.sortBy === "createdAt"
+              ? "newest"
+              : "popularity"
+          }
+          onChange={(e) => handleSortChange(e.target.value)}
+        />
+      </div>
+
+      {/* Mobile: Categories Horizontal Scroll */}
+      <div className="lg:hidden mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Categories
+        </label>
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              !filters.category
+                ? "bg-orange-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+            onClick={() => handleCategoryChange("All")}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                filters.category === cat
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+              onClick={() => handleCategoryChange(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: Categories */}
+      <div className="hidden lg:block mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Categories
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              !filters.category
+                ? "bg-orange-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+            onClick={() => handleCategoryChange("All")}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                filters.category === cat
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+              onClick={() => handleCategoryChange(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Price Range */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Price Range
+        </label>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            placeholder="Min"
+            value={filters.minPrice || ""}
+            onChange={(e) => handlePriceChange("min", e.target.value)}
+            className="text-sm"
+          />
+          <span className="text-gray-400">-</span>
+          <Input
+            type="number"
+            placeholder="Max"
+            value={filters.maxPrice || ""}
+            onChange={(e) => handlePriceChange("max", e.target.value)}
+            className="text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Stores Filter (if provided) */}
+      {stores.length > 0 && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Stores
+          </label>
+          <Select
+            options={[
+              { value: "", label: "All Stores" },
+              ...stores.map((store) => ({ value: store, label: store })),
+            ]}
+            value={filters.store || ""}
+            onChange={(e) =>
+              onFiltersChange({
+                ...filters,
+                store: e.target.value || undefined,
+                page: 1,
+              })
+            }
+          />
+        </div>
+      )}
+
+      {/* Clear Filters */}
+      {hasActiveFilters && (
         <Button
           variant="outline"
-          onClick={() => setIsOpen(!isOpen)}
+          size="sm"
           className="w-full"
+          onClick={clearFilters}
         >
-          <Filter className="h-4 w-4 mr-2" />
-          Filters {hasActiveFilters && "(Active)"}
+          <X className="w-4 h-4 mr-2" />
+          Clear Filters
         </Button>
-      </div>
-
-      {/* Filters Section */}
-      <div className={`${isOpen ? "block" : "hidden md:block"}`}>
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Filters</CardTitle>
-              {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  <X className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Categories */}
-            <div>
-              <h4 className="text-sm font-medium mb-2">Categories</h4>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryChange(category)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      filters.category === category
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Stores */}
-            <div>
-              <h4 className="text-sm font-medium mb-2">Stores</h4>
-              <div className="flex flex-wrap gap-2">
-                {stores.map((store) => (
-                  <button
-                    key={store}
-                    onClick={() => handleStoreChange(store)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      filters.store === store
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {store}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <h4 className="text-sm font-medium mb-2">Price Range</h4>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={filters.minPrice || ""}
-                  onChange={(e) => handlePriceChange("minPrice", e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-                <span className="text-muted-foreground">-</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={filters.maxPrice || ""}
-                  onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
-                  className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </div>
   );
 }
