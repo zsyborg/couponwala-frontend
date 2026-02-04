@@ -18,6 +18,7 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { payments, redemptions, favorites, referrals, wallet, auth } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Favorite } from "@/types";
 
 // Types
@@ -1325,6 +1326,7 @@ function SettingsTab() {
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
+  const { isAuthenticated: isAuthContextAuthenticated, isLoading: isAuthContextLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const [orders, setOrders] = useState<Order[]>([]);
   const [redemptionsList, setRedemptionsList] = useState<Redemption[]>([]);
@@ -1372,11 +1374,18 @@ export default function ProfilePage() {
     }
   }, []);
 
+  // Combined loading state - wait for both auth methods to initialize
+  const isLoading = status === "loading" || (isAuthContextLoading && !isAuthContextAuthenticated);
+  
+  // Combined authenticated state - either NextAuth session or AuthContext
+  const isAuthenticated = status === "authenticated" || isAuthContextAuthenticated;
+
+  // Fetch data when user is authenticated (from either auth method)
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       fetchData();
     }
-  }, [status, fetchData]);
+  }, [isAuthenticated, fetchData]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase());
@@ -1384,7 +1393,7 @@ export default function ProfilePage() {
     return matchesSearch && matchesStatus;
   });
 
-  if (status === "loading") {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -1392,7 +1401,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  if (!isAuthenticated) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <div className="max-w-md mx-auto">

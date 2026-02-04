@@ -1,7 +1,11 @@
 import { User, Offer, PaginatedResponse, Favorite } from '@/types';
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// Note: API_URL should be the base URL without /api suffix (e.g., http://localhost:3001)
+// The /api prefix is automatically added
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api` 
+  : 'http://localhost:3001/api';
 
 // Types
 interface AuthResponse {
