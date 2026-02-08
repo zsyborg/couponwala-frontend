@@ -12,7 +12,6 @@ interface AuthContextType {
   login: (phoneNumber: string, password: string) => Promise<void>;
   loginWithOTP: (phoneNumber: string, otp: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
-  registerWithOTP: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: ProfileUpdateData) => Promise<void>;
   sendOTP: (phoneNumber: string) => Promise<void>;
@@ -25,9 +24,7 @@ interface RegisterData {
   phoneNumber: string;
   password: string;
   name: string;
-  email?: string;
   referralCode?: string;
-  otp?: string;
 }
 
 interface ProfileUpdateData {
@@ -80,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.login(phoneNumber, password);
       setUser(response.user);
-      setToken(response.accessToken);
+      setToken(response.token);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
@@ -96,7 +93,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.loginWithOTP(phoneNumber, otp);
       setUser(response.user);
-      setToken(response.accessToken);
+      setToken(response.token);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
@@ -112,23 +109,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await auth.register(data.phoneNumber, data.password, data.name, data.referralCode);
       setUser(response.user);
-      setToken(response.accessToken);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Registration failed";
-      setError(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const registerWithOTP = useCallback(async (data: RegisterData) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await auth.registerWithOTP(data.phoneNumber, "", data.name, data.email, data.referralCode);
-      setUser(response.user);
-      setToken(response.accessToken);
+      setToken(response.token);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);
@@ -204,7 +185,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     loginWithOTP,
     register,
-    registerWithOTP,
     logout,
     updateProfile,
     sendOTP,

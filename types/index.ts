@@ -5,7 +5,8 @@ export interface User {
   email?: string;
   name: string;
   avatar?: string;
-  createdAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LoginParams {
@@ -22,8 +23,8 @@ export interface RegisterParams {
 
 export interface AuthResponse {
   user: User;
-  accessToken: string;
-  refreshToken: string;
+  token: string;
+  refreshToken?: string;
 }
 
 // Offer Types
