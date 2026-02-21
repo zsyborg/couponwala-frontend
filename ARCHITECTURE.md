@@ -402,10 +402,9 @@ export const endpoints = {
     redeem: (id: string) => `/offers/${id}/redeem`,
   },
   payments: {
-    createIntent: '/payments/create-payment-intent',
-    confirm: '/payments/confirm',
+    createOrder: '/payments/create-order',
+    verify: '/payments/verify',
     history: '/payments',
-    methods: '/payments/payment-methods',
   },
 };
 ```
@@ -639,8 +638,8 @@ sequenceDiagram
     CartStore->>User: Update cart count
     
     User->>CartStore: proceedToCheckout()
-    CartStore->>API: Create payment intent (when payment added)
-    API->>CartStore: Payment client secret
+    CartStore->>API: Create Razorpay order (when payment added)
+    API->>CartStore: Razorpay order ID and key
     CartStore->>User: Redirect to checkout
 ```
 
@@ -682,8 +681,8 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 FACEBOOK_CLIENT_ID=your-facebook-app-id
 FACEBOOK_CLIENT_SECRET=your-facebook-app-secret
 
-# Stripe (for future)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
+# Razorpay
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxx
 ```
 
 ### Type Safety for Environment Variables
@@ -700,7 +699,7 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   FACEBOOK_CLIENT_ID: z.string().min(1),
   FACEBOOK_CLIENT_SECRET: z.string().min(1),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

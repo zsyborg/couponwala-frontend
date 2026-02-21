@@ -1,6 +1,7 @@
 // Frontend API service for fetching offers
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use relative URLs to leverage Next.js rewrites (avoids CORS issues)
+const API_BASE_URL = '';
 
 export interface Offer {
   _id: string;

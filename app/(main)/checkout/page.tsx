@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,23 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Card, CardHeader, CardTitle, CardBody } from '@/components/ui/Card';
+import axios from 'axios';
+
+// Load Razorpay script
+const loadRazorpayScript = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        if (document.getElementById('razorpay-script')) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.id = 'razorpay-script';
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Razorpay script'));
+        document.body.appendChild(script);
+    });
+};
 
 // Types
 interface AddressFormData {
@@ -128,7 +145,7 @@ const DEMO_COUPONS: Record<string, Coupon> = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { items, totalPrice, discount, finalPrice, appliedCoupon, applyCoupon, removeCoupon, clearCart, isLoading: cartLoading } = useCart();
   const { addToast } = useToast();
 
@@ -304,15 +321,105 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      // Simulate order creation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // For Cash on Delivery, skip Razorpay
+      if (selectedPayment === 'cod') {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await clearCart();
+        addToast('success', 'Order placed successfully!');
+        router.push('/checkout/confirmation');
+        return;
+      }
 
-      // Clear cart and redirect
-      await clearCart();
-      addToast('success', 'Order placed successfully!');
-      router.push('/checkout/confirmation');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to place order';
+      // Load Razorpay script
+      await loadRazorpayScript();
+
+      // Create payment order via API
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await axios.post(`${API_URL}/api/payments/create-order`, {
+        amount: grandTotal,
+        currency: 'INR',
+        items: items.map((item: CartItem) => ({
+          offerId: item.offerId,
+          title: item.title,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        customerId: user?.id,
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to create payment order');
+      }
+
+      const { orderId, keyId, amount: orderAmount, currency: orderCurrency, mockMode } = response.data;
+
+      // If in mock mode, simulate successful payment
+      if (mockMode) {
+        console.warn('Running in mock mode - simulating payment success');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await clearCart();
+        addToast('success', 'Order placed successfully! (Mock Mode)');
+        router.push('/checkout/confirmation');
+        return;
+      }
+
+      // Initialize Razorpay
+      const options = {
+        key: keyId,
+        name: 'CouponWala',
+        description: 'Order Payment',
+        order_id: orderId,
+        amount: orderAmount,
+        currency: orderCurrency,
+        prefill: {
+          name: formData.fullName,
+          email: user?.email || '',
+          contact: formData.phoneNumber,
+        },
+        notes: {
+          address: `${formData.addressLine1}, ${formData.city}, ${formData.state} - ${formData.pinCode}`,
+        },
+        theme: {
+          color: '#f97316',
+        },
+        handler: async (razorpayResponse: any) => {
+          try {
+            // Verify payment
+            const verifyResponse = await axios.post(`${API_URL}/api/payments/verify`, {
+              razorpayOrderId: razorpayResponse.razorpay_order_id,
+              razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+              razorpaySignature: razorpayResponse.razorpay_signature,
+              customerId: user?.id,
+              items: items.map((item: CartItem) => ({
+                offerId: item.offerId,
+                title: item.title,
+                quantity: item.quantity,
+                price: item.price,
+              })),
+            });
+
+            if (verifyResponse.data.success) {
+              await clearCart();
+              addToast('success', 'Payment successful! Order placed.');
+              router.push('/checkout/confirmation');
+            } else {
+              addToast('error', verifyResponse.data.message || 'Payment verification failed');
+            }
+          } catch (verifyError: any) {
+            addToast('error', verifyError.response?.data?.message || 'Payment verification failed');
+          }
+        },
+      };
+
+      // @ts-ignore - Razorpay is loaded dynamically
+      if (window.Razorpay) {
+        const razorpay = new window.Razorpay(options);
+        razorpay.open();
+      } else {
+        throw new Error('Razorpay not loaded');
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || 'Failed to place order';
       addToast('error', message);
     } finally {
       setIsProcessing(false);
